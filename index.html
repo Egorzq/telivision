@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <!-- Ограничение масштабирования для старых ТВ-браузеров -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LG Smart TV Portal</title>
+  <style>
+    /* Базовые стили без CSS-переменных для максимальной совместимости со старыми движками */
+    * {
+      box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #12141a;
+      color: #ffffff;
+      font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+      padding: 24px 36px;
+      overflow-x: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Верхняя панель: Часы и Заголовок */
+    .header {
+      width: 100%;
+      border-bottom: 2px solid #262c38;
+      padding-bottom: 18px;
+      margin-bottom: 24px;
+      clear: both;
+      overflow: hidden;
+    }
+
+    .header-left {
+      float: left;
+    }
+
+    .header-right {
+      float: right;
+      text-align: right;
+    }
+
+    .title {
+      font-size: 32px;
+      font-weight: bold;
+      color: #38bdf8;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .clock {
+      font-size: 36px;
+      font-weight: bold;
+      color: #f8fafc;
+      letter-spacing: 2px;
+    }
+
+    .date {
+      font-size: 16px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    /* Подсказка по управлению пультом */
+    .remote-hint {
+      background-color: #1e2430;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 15px;
+      color: #cbd5e1;
+      margin-bottom: 24px;
+      clear: both;
+    }
+
+    .remote-hint span {
+      display: inline-block;
+      background-color: #334155;
+      color: #f8fafc;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+      margin: 0 4px;
+    }
+
+    /* Секции */
+    .section-title {
+      font-size: 22px;
+      color: #f1f5f9;
+      margin: 20px 0 12px 0;
+      border-left: 4px solid #38bdf8;
+      padding-left: 10px;
+    }
+
+    /* Сетка кнопок */
+    .grid {
+      margin-left: -8px;
+      margin-right: -8px;
+      margin-bottom: 16px;
+      clear: both;
+      overflow: hidden;
+    }
+
+    /* Плитка / Кнопка для ТВ */
+    .tile {
+      display: block;
+      float: left;
+      width: 25%;
+      padding: 8px;
+      text-decoration: none;
+      outline: none;
+    }
+
+    @media (max-width: 900px) {
+      .tile {
+        width: 33.333%;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .tile {
+        width: 50%;
+      }
+    }
+
+    .tile-inner {
+      background-color: #1e2430;
+      border: 3px solid #2d3748;
+      border-radius: 12px;
+      padding: 20px 16px;
+      text-align: center;
+      min-height: 110px;
+      cursor: pointer;
+      -webkit-transition: all 0.15s ease-in-out;
+      transition: all 0.15s ease-in-out;
+    }
+
+    .tile-icon {
+      font-size: 32px;
+      line-height: 1.2;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .tile-name {
+      font-size: 18px;
+      font-weight: bold;
+      color: #f8fafc;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tile-desc {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-top: 4px;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Фокус пульта: яркая желто-голубая обводка для ТВ */
+    .tile:focus .tile-inner,
+    .tile.active-focus .tile-inner {
+      background-color: #273349;
+      border-color: #facc15;
+      box-shadow: 0 0 16px rgba(250, 204, 21, 0.7);
+      -webkit-box-shadow: 0 0 16px rgba(250, 204, 21, 0.7);
+      -webkit-transform: scale(1.03);
+      transform: scale(1.03);
+    }
+
+    .tile:focus .tile-name,
+    .tile.active-focus .tile-name {
+      color: #facc15;
+    }
+
+    /* Форма прямого открытия ссылки */
+    .url-launcher {
+      background-color: #1e2430;
+      border: 2px solid #2d3748;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 20px;
+      clear: both;
+      overflow: hidden;
+    }
+
+    .url-input {
+      width: 70%;
+      float: left;
+      background-color: #0f172a;
+      border: 2px solid #334155;
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 18px;
+      color: #ffffff;
+      outline: none;
+    }
+
+    .url-input:focus,
+    .url-input.active-focus {
+      border-color: #facc15;
+      box-shadow: 0 0 10px rgba(250, 204, 21, 0.6);
+    }
+
+    .url-button {
+      width: 27%;
+      float: right;
+      background-color: #0284c7;
+      border: 2px solid #38bdf8;
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #ffffff;
+      cursor: pointer;
+      outline: none;
+      text-align: center;
+    }
+
+    .url-button:focus,
+    .url-button.active-focus {
+      background-color: #0369a1;
+      border-color: #facc15;
+      box-shadow: 0 0 12px rgba(250, 204, 21, 0.8);
+      color: #facc15;
+    }
+
+    /* Модальное окно плеера */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      z-index: 9999;
+      text-align: center;
+      padding-top: 40px;
+    }
+
+    .modal-content {
+      display: inline-block;
+      width: 85%;
+      max-width: 900px;
+      background-color: #1e2430;
+      border: 3px solid #38bdf8;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: left;
+    }
+
+    .modal video {
+      width: 100%;
+      max-height: 480px;
+      background-color: #000000;
+      border-radius: 6px;
+    }
+
+    .modal-close-btn {
+      margin-top: 15px;
+      background-color: #ef4444;
+      border: 2px solid #f87171;
+      color: #ffffff;
+      padding: 10px 24px;
+      font-size: 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      outline: none;
+      font-weight: bold;
+    }
+
+    .modal-close-btn:focus,
+    .modal-close-btn.active-focus {
+      border-color: #facc15;
+      color: #facc15;
+      box-shadow: 0 0 10px #facc15;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Верхняя панель -->
+  <div class="header">
+    <div class="header-left">
+      <div class="title">LG SMART TV PORTAL</div>
+      <div class="subtitle">Легкий веб-портал для старых телевизоров и WebOS</div>
+    </div>
+    <div class="header-right">
+      <div id="tv-clock" class="clock">--:--:--</div>
+      <div id="tv-date" class="date">Загрузка...</div>
+    </div>
+  </div>
+
+  <!-- Подсказка по пульту -->
+  <div class="remote-hint">
+    Управление: Стрелки <span>▲</span> <span>▼</span> <span>◄</span> <span>►</span> для перемещения | Кнопка <span>OK</span> (Enter) для выбора | <span>Back</span> или <span>Esc</span> для закрытия
+  </div>
+
+  <!-- Популярные видео-сервисы -->
+  <div class="section-title">Видео и Кино</div>
+  <div class="grid" id="grid-video">
+    <a href="https://www.youtube.com" class="tile tv-btn" tabindex="0">
+      <div class="tile-inner">
+        <span class="tile-icon" style="color: #ef4444;">▶</span>
+        <span class="tile-name">YouTube</span>
+        <span class="tile-desc">Стандартная версия</span>
+      </div>
+    </a>
+    <a href="https://vk.com/video" class="tile tv-btn" tabindex="0">
+      <div class="tile-inner">
+        <span class="tile-icon" style="color: #3b82f6;">🎬</span>
+        <span class="tile-name">VK Видео</span>
+        <span class="tile-desc">Фильмы, ролики и шоу</span>
+      </div>
+    </a>
+    <a href="https://rutube.ru" class="tile tv-btn" tabindex="0">
+      <div class="tile-inner">
+        <span class="tile-icon" style="color: #10b981;">📺</span>
+        <span class="tile-name">Rutube</span>
+        <span class="tile-desc">Российский видеохостинг</span>
+      </div>
+    </a>
+    <a href="https://smotrim.ru" class="tile tv-btn" tabindex="0">
+      <div class="tile-inner">
+        <span class="tile-icon" style="color: #f59e0b;">🏛️</span>
+        <span class="tile-name">Смотрим.ру</span>
+        <span class="tile-desc">ТВ передачи и фильмы</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Онлайн ТВ и Радио -->
+  <div class="section-title">Телевидение и Радио</div>
+  <div class="grid" id="grid-tv">
+    <a href="https://peers.tv" class="tile tv-btn" tabindex="0">
+      <div class="tile-inner">
+        <span class="tile-icon" style="color: #06b6d4;">📡</span>
+        <span class="tile-name">Peers.TV</span>
+        <span class="tile-desc">ТВ каналы онлайн</span>
+      </div>
+    </a>
+    <a href="https://limehd.tv" class="tile tv-btn" tabindex="0">
+      <div class="tile-inner">
+        <span class="tile-icon" style="color: #84cc16;">🟢</span>
+        <span class="tile-name">Лайм HD TV</span>
+        <span class="tile-desc">Бесплатное ТВ</span>
+      </div>
+    </a>
+    <a href="https://pcradio.ru" class="tile tv-btn" tabindex="0">
+      <div class="tile-inner">
+        <span class="tile-icon" style="color: #a855f7;">📻</span>
+        <span class="tile-name">Онлайн Радио</span>
+        <span class="tile-desc">Музыка без рекламы</span>
+      </div>
+    </a>
+    <a href="javascript:void(0);" onclick="openTestPlayer();" class="tile tv-btn" tabindex="0">
+      <div class="tile-inner">
+        <span class="tile-icon" style="color: #ec4899;">🎞️</span>
+        <span class="tile-name">Тест Плеера</span>
+        <span class="tile-desc">Проверка HTML5 видео</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Инструменты и погода -->
+  <div class="section-title">Инструменты и Инфо</div>
+  <div class="grid" id="grid-tools">
+    <a href="https://yandex.ru/pogoda" class="tile tv-btn" tabindex="0">
+      <div class="tile-inner">
+        <span class="tile-icon" style="color: #38bdf8;">⛅</span>
+        <span class="tile-name">Погода</span>
+        <span class="tile-desc">Яндекс Погода</span>
+      </div>
+    </a>
+    <a href="https://dzen.ru/news" class="tile tv-btn" tabindex="0">
+      <div class="tile-inner">
+        <span class="tile-icon" style="color: #e2e8f0;">📰</span>
+        <span class="tile-name">Новости</span>
+        <span class="tile-desc">Главные события дня</span>
+      </div>
+    </a>
+    <a href="https://2ip.ru" class="tile tv-btn" tabindex="0">
+      <div class="tile-inner">
+        <span class="tile-icon" style="color: #22c55e;">🌐</span>
+        <span class="tile-name">Проверка Скорости</span>
+        <span class="tile-desc">Тест интернета 2ip</span>
+      </div>
+    </a>
+    <a href="javascript:void(0);" onclick="addCustomBookmark();" class="tile tv-btn" tabindex="0">
+      <div class="tile-inner">
+        <span class="tile-icon" style="color: #eab308;">⭐</span>
+        <span class="tile-name">+ Добавить сайт</span>
+        <span class="tile-desc">Сохранить в закладки</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Блок собственных закладок (если добавлены) -->
+  <div id="custom-bookmarks-section" style="display: none;">
+    <div class="section-title">Мои Закладки</div>
+    <div class="grid" id="grid-custom"></div>
+  </div>
+
+  <!-- Прямой ввод любого адреса -->
+  <div class="section-title">Открыть любой сайт</div>
+  <div class="url-launcher">
+    <input type="text" id="custom-url" class="url-input tv-btn" tabindex="0" placeholder="https://example.com" value="https://" />
+    <button type="button" id="btn-go" class="url-button tv-btn" tabindex="0" onclick="launchUrl();">Перейти</button>
+  </div>
+
+  <!-- Модальное окно HTML5 видео плеера -->
+  <div id="videoModal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 12px; color: #38bdf8; font-size: 20px;">HTML5 Видео Плеер (Тест ТВ)</h3>
+      <video id="tvPlayer" controls preload="metadata">
+        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+        Ваш браузер не поддерживает HTML5 видео.
+      </video>
+      <div style="text-align: right;">
+        <button type="button" class="modal-close-btn tv-btn" tabindex="0" onclick="closeTestPlayer();">Закрыть плеер</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript написан строго по стандарту ES5 (без let, const, стрелочных функций и fetch) для максимальной совместимости со старыми чипами LG -->
+  <script>
+    // --- ЧАСЫ И ДАТА ---
+    function updateClock() {
+      var dateObj = new Date();
+      var h = dateObj.getHours();
+      var m = dateObj.getMinutes();
+      var s = dateObj.getSeconds();
+      
+      var hStr = (h < 10 ? "0" : "") + h;
+      var mStr = (m < 10 ? "0" : "") + m;
+      var sStr = (s < 10 ? "0" : "") + s;
+      
+      var clockEl = document.getElementById("tv-clock");
+      if (clockEl) {
+        clockEl.innerHTML = hStr + ":" + mStr + ":" + sStr;
+      }
+
+      var days = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+      var months = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+      
+      var dayName = days[dateObj.getDay()];
+      var dayNum = dateObj.getDate();
+      var monthName = months[dateObj.getMonth()];
+      var year = dateObj.getFullYear();
+      
+      var dateEl = document.getElementById("tv-date");
+      if (dateEl) {
+        dateEl.innerHTML = dayName + ", " + dayNum + " " + monthName + " " + year;
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // --- ПЕРЕХОД ПО ССЫЛКЕ ---
+    function launchUrl() {
+      var input = document.getElementById("custom-url");
+      if (!input) return;
+      var url = input.value;
+      if (!url || url === "https://" || url === "http://") {
+        alert("Пожалуйста, введите адрес сайта.");
+        return;
+      }
+      if (url.indexOf("http://") !== 0 && url.indexOf("https://") !== 0) {
+        url = "http://" + url;
+      }
+      window.location.href = url;
+    }
+
+    // --- ТЕСТОВЫЙ ПЛЕЕР ---
+    function openTestPlayer() {
+      var modal = document.getElementById("videoModal");
+      var video = document.getElementById("tvPlayer");
+      if (modal) {
+        modal.style.display = "block";
+      }
+      if (video) {
+        video.play();
+      }
+      refreshNavElements();
+      var closeBtn = modal.querySelector(".modal-close-btn");
+      if (closeBtn) closeBtn.focus();
+    }
+
+    function closeTestPlayer() {
+      var modal = document.getElementById("videoModal");
+      var video = document.getElementById("tvPlayer");
+      if (video) {
+        video.pause();
+      }
+      if (modal) {
+        modal.style.display = "none";
+      }
+      refreshNavElements();
+      focusCurrent();
+    }
+
+    // --- ПОЛЬЗОВАТЕЛЬСКИЕ ЗАКЛАДКИ ---
+    function loadCustomBookmarks() {
+      try {
+        var raw = localStorage.getItem("lg_tv_custom_bookmarks");
+        if (!raw) return;
+        var list = JSON.parse(raw);
+        if (list && list.length > 0) {
+          var container = document.getElementById("grid-custom");
+          var section = document.getElementById("custom-bookmarks-section");
+          if (!container || !section) return;
+          
+          container.innerHTML = "";
+          for (var i = 0; i < list.length; i++) {
+            var item = list[i];
+            var a = document.createElement("a");
+            a.href = item.url;
+            a.className = "tile tv-btn";
+            a.tabIndex = 0;
+            a.innerHTML = '<div class="tile-inner">' +
+              '<span class="tile-icon" style="color: #38bdf8;">🔗</span>' +
+              '<span class="tile-name">' + (item.title || "Закладка") + '</span>' +
+              '<span class="tile-desc">' + item.url + '</span>' +
+            '</div>';
+            container.appendChild(a);
+          }
+          section.style.display = "block";
+        }
+      } catch (e) {
+        // Старые браузеры могут не поддерживать JSON или localStorage
+      }
+    }
+
+    function addCustomBookmark() {
+      var title = prompt("Введите название сайта:", "Мой сайт");
+      if (!title) return;
+      var url = prompt("Введите адрес сайта (URL):", "https://");
+      if (!url || url === "https://") return;
+
+      try {
+        var raw = localStorage.getItem("lg_tv_custom_bookmarks");
+        var list = raw ? JSON.parse(raw) : [];
+        list.push({ title: title, url: url });
+        localStorage.setItem("lg_tv_custom_bookmarks", JSON.stringify(list));
+        loadCustomBookmarks();
+        refreshNavElements();
+      } catch (e) {
+        alert("Не удалось сохранить закладку (возможно, отключен localStorage).");
+      }
+    }
+
+    // --- НАВИГАЦИЯ С ПУЛЬТА ТЕЛЕВИЗОРА (D-PAD & ОК) ---
+    var navElements = [];
+    var currentNavIndex = 0;
+
+    function refreshNavElements() {
+      var elements = document.querySelectorAll(".tv-btn");
+      navElements = [];
+      for (var i = 0; i < elements.length; i++) {
+        // Учитываем только видимые элементы
+        if (elements[i].offsetParent !== null) {
+          navElements.push(elements[i]);
+        }
+      }
+    }
+
+    function focusCurrent() {
+      if (navElements.length === 0) return;
+      if (currentNavIndex < 0) currentNavIndex = 0;
+      if (currentNavIndex >= navElements.length) currentNavIndex = navElements.length - 1;
+      
+      for (var i = 0; i < navElements.length; i++) {
+        var el = navElements[i];
+        if (el.classList) {
+          el.classList.remove("active-focus");
+        } else {
+          el.className = el.className.replace(/\bactive-focus\b/g, "");
+        }
+      }
+      
+      var target = navElements[currentNavIndex];
+      if (target) {
+        if (target.classList) {
+          target.classList.add("active-focus");
+        } else {
+          target.className += " active-focus";
+        }
+        target.focus();
+      }
+    }
+
+    // Привязываем слушатели мыши (Magic Remote или курсор)
+    function attachMouseEvents() {
+      for (var i = 0; i < navElements.length; i++) {
+        (function(index) {
+          var item = navElements[index];
+          item.onmouseenter = function() {
+            currentNavIndex = index;
+            focusCurrent();
+          };
+        })(i);
+      }
+    }
+
+    // Обработка клавиш пульта
+    window.document.onkeydown = function(e) {
+      e = e || window.event;
+      var keyCode = e.keyCode || e.which;
+
+      // Коды кнопок:
+      // Влево: 37
+      // Вверх: 38
+      // Вправо: 39
+      // Вниз: 40
+      // Enter / OK: 13
+      // Back / Return (LG webOS / NetCast): 461, 10009, 8 (Backspace), 27 (Esc)
+      
+      // Если открыто модальное окно и нажат Back / Esc
+      var modal = document.getElementById("videoModal");
+      if (modal && modal.style.display === "block") {
+        if (keyCode === 461 || keyCode === 10009 || keyCode === 27 || keyCode === 8) {
+          closeTestPlayer();
+          if (e.preventDefault) e.preventDefault();
+          return false;
+        }
+      }
+
+      var cols = 4;
+      if (window.innerWidth <= 600) cols = 2;
+      else if (window.innerWidth <= 900) cols = 3;
+
+      if (keyCode === 37) { // Left
+        if (currentNavIndex > 0) {
+          currentNavIndex--;
+          focusCurrent();
+        }
+        if (e.preventDefault) e.preventDefault();
+        return false;
+      } else if (keyCode === 39) { // Right
+        if (currentNavIndex < navElements.length - 1) {
+          currentNavIndex++;
+          focusCurrent();
+        }
+        if (e.preventDefault) e.preventDefault();
+        return false;
+      } else if (keyCode === 38) { // Up
+        if (currentNavIndex - cols >= 0) {
+          currentNavIndex -= cols;
+          focusCurrent();
+        }
+        if (e.preventDefault) e.preventDefault();
+        return false;
+      } else if (keyCode === 40) { // Down
+        if (currentNavIndex + cols < navElements.length) {
+          currentNavIndex += cols;
+          focusCurrent();
+        } else if (currentNavIndex < navElements.length - 1) {
+          currentNavIndex = navElements.length - 1;
+          focusCurrent();
+        }
+        if (e.preventDefault) e.preventDefault();
+        return false;
+      } else if (keyCode === 13) { // Enter / OK
+        var el = navElements[currentNavIndex];
+        if (el) {
+          if (el.tagName.toLowerCase() === "a") {
+            el.click();
+          } else if (el.tagName.toLowerCase() === "button") {
+            el.click();
+          } else if (el.id === "custom-url") {
+            launchUrl();
+          }
+        }
+      }
+    };
+
+    // Инициализация при загрузке страницы
+    window.onload = function() {
+      loadCustomBookmarks();
+      refreshNavElements();
+      attachMouseEvents();
+      // Фокус на первый элемент
+      setTimeout(function() {
+        focusCurrent();
+      }, 300);
+    };
+  </script>
+</body>
+</html>
